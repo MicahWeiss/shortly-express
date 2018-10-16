@@ -10,8 +10,10 @@ var User = require('./app/models/user');
 var Links = require('./app/collections/links');
 var Link = require('./app/models/link');
 var Click = require('./app/models/click');
+var session = require('express-session'); //MJW
 
 var app = express();
+
 
 app.set('views', __dirname + '/views');
 app.set('view engine', 'ejs');
@@ -22,62 +24,97 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(__dirname + '/public'));
 
+app.use(session({ //MJW
+  secret: 'this is a secret',
+  //name: 'this is a secret',
+  // proxy: true,
+  resave: false,
+  saveUninitialized: true
+}));
 
+//Note to MICAH: .use establishes rules, it is not get/post/put/del
+
+//This is a get req with path '/' exactly. Wildcard route at bottom.
 app.get('/', 
-function(req, res) {
-  res.render('index');
-});
+  function(req, res) {
+    console.log('GET req to /');
+    // if(!false){//placeholder to check if logged in
+    //   res.render('login');
+    // }
+    res.render('index');
+  });
 
 app.get('/create', 
-function(req, res) {
-  res.render('index');
-});
+  function(req, res) {
+    console.log('GET req to /create');
+    res.render('index');
+  });
 
 app.get('/links', 
-function(req, res) {
-  Links.reset().fetch().then(function(links) {
-    res.status(200).send(links.models);
+  function(req, res) {
+    console.log('GET req to /links');
+    Links.reset().fetch().then(function(links) {
+      res.status(200).send(links.models);
+    });
   });
-});
 
 app.post('/links', 
-function(req, res) {
-  var uri = req.body.url;
+  function(req, res) {
+    console.log('POST req to /links');
+    var uri = req.body.url;
 
-  if (!util.isValidUrl(uri)) {
-    console.log('Not a valid url: ', uri);
-    return res.sendStatus(404);
-  }
-
-  new Link({ url: uri }).fetch().then(function(found) {
-    if (found) {
-      res.status(200).send(found.attributes);
-    } else {
-      util.getUrlTitle(uri, function(err, title) {
-        if (err) {
-          console.log('Error reading URL heading: ', err);
-          return res.sendStatus(404);
-        }
-
-        Links.create({
-          url: uri,
-          title: title,
-          baseUrl: req.headers.origin
-        })
-        .then(function(newLink) {
-          res.status(200).send(newLink);
-        });
-      });
+    if (!util.isValidUrl(uri)) {
+      console.log('Not a valid url: ', uri);
+      return res.sendStatus(404);
     }
+
+    new Link({ url: uri }).fetch().then(function(found) {
+      if (found) {
+        res.status(200).send(found.attributes);
+      } else {
+        util.getUrlTitle(uri, function(err, title) {
+          if (err) {
+            console.log('Error reading URL heading: ', err);
+            return res.sendStatus(404);
+          }
+
+          Links.create({
+            url: uri,
+            title: title,
+            baseUrl: req.headers.origin
+          })
+            .then(function(newLink) {
+              res.status(200).send(newLink);
+            });
+        });
+      }
+    });
   });
-});
 
 /************************************************************/
 // Write your authentication routes here
 /************************************************************/
 
+function restrict(req, res, next) { //copied from 9bit tutorial
+  if (req.session.user) {
+    next();
+  } else {
+    req.session.error = 'Access denied!';
+    res.redirect('/login');
+  }
+}
 
+app.get('/login', 
+  function(req, res) {
+    console.log('GET req to /login');
+    res.render('login');
+  });
 
+app.get('/signup',
+  function(req, res) {
+    console.log('GET req to /signup');
+    res.render('signup');
+  });
 /************************************************************/
 // Handle the wildcard route last - if all other routes fail
 // assume the route is a short code and try and handle it here.

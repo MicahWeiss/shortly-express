@@ -1,6 +1,6 @@
 var db = require('../config');
 var Click = require('./click');
-var crypto = require('crypto');
+var crypto = require('crypto'); //MICAH: look at this funky crypto biz
 
 var Link = db.Model.extend({
   tableName: 'urls',
