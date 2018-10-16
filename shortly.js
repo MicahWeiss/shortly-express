@@ -110,13 +110,22 @@ app.get('/signup',
 //MJW todo: handle post requests login and signup servers
 app.post('/signup',  function(req, res) {
   console.log('POST req to /signup');
-  console.log('body: ', req.body);
   console.log('New username', req.body.username);
   console.log('New password', req.body.password);
   Users.create({username : req.body.username, password : req.body.password });
-  res.statusCode(200).send('USER CREATED!');
+  res.status(201).redirect('/');
 });
-  
+
+app.post('/login', function(req, res){
+  console.log('Login failed');
+  res.status(403).redirect('/login');
+  /*unction(req, res) {
+    console.log('GET req to /links');
+    Links.reset().fetch().then(function(links) {
+      res.status(200).send(links.models);
+    });
+  });*/
+});
 /************************************************************/
 // Handle the wildcard route last - if all other routes fail
 // assume the route is a short code and try and handle it here.
