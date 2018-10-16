@@ -10,11 +10,8 @@ var User = require('./app/models/user');
 var Links = require('./app/collections/links');
 var Link = require('./app/models/link');
 var Click = require('./app/models/click');
-var session = require('express-session'); //MJW
-
 var app = express();
-
-
+var session = require('express-session'); //MJW
 app.set('views', __dirname + '/views');
 app.set('view engine', 'ejs');
 app.use(partials());
@@ -26,21 +23,16 @@ app.use(express.static(__dirname + '/public'));
 
 app.use(session({ //MJW
   secret: 'this is a secret',
-  //name: 'this is a secret',
+  //name: 'this is also a secret',
   // proxy: true,
   resave: false,
   saveUninitialized: true
 }));
 
-//Note to MICAH: .use establishes rules, it is not get/post/put/del
-
 //This is a get req with path '/' exactly. Wildcard route at bottom.
-app.get('/', 
+app.get('/',  
   function(req, res) {
     console.log('GET req to /');
-    // if(!false){//placeholder to check if logged in
-    //   res.render('login');
-    // }
     res.render('index');
   });
 
@@ -64,7 +56,7 @@ app.post('/links',
     var uri = req.body.url;
 
     if (!util.isValidUrl(uri)) {
-      console.log('Not a valid url: ', uri);
+      console.log('Error. This is not a valid url: ', uri);
       return res.sendStatus(404);
     }
 
@@ -95,8 +87,8 @@ app.post('/links',
 // Write your authentication routes here
 /************************************************************/
 
-function restrict(req, res, next) { //copied from 9bit tutorial
-  if (req.session.user) {
+function checkUser(req, res, next) { //retitled, copied from 9bit tutorial
+  if (req.session.user) { //Will need to add in password auth?
     next();
   } else {
     req.session.error = 'Access denied!';
@@ -115,6 +107,16 @@ app.get('/signup',
     console.log('GET req to /signup');
     res.render('signup');
   });
+//MJW todo: handle post requests login and signup servers
+app.post('/signup',  function(req, res) {
+  console.log('POST req to /signup');
+  console.log('body: ', req.body);
+  console.log('New username', req.body.username);
+  console.log('New password', req.body.password);
+  Users.create({username : req.body.username, password : req.body.password });
+  res.statusCode(200).send('USER CREATED!');
+});
+  
 /************************************************************/
 // Handle the wildcard route last - if all other routes fail
 // assume the route is a short code and try and handle it here.

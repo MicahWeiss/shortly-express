@@ -53,10 +53,10 @@ describe('', function() {
       .del()
       .catch(function(error) {
         // uncomment when writing authentication tests
-        // throw {
-        //   type: 'DatabaseError',
-        //   message: 'Failed to create test setup data'
-        // };
+        throw {
+          type: 'DatabaseError',
+          message: 'Failed to create test setup data'
+        };
       });
 
     // delete user Phillip from db so it can be created later for the test
@@ -115,7 +115,7 @@ describe('', function() {
     });
 
     describe('Shortening links:', function() {
-
+      this.timeout(10000); //MJW set timeout to 10sec
       var options = {
         'method': 'POST',
         'followAllRedirects': true,
@@ -124,7 +124,7 @@ describe('', function() {
           'url': 'http://roflzoo.com/'
         }
       };
-
+    
       it('Responds with the short code', function(done) {
         requestWithSession(options, function(error, res, body) {
           expect(res.body.url).to.equal('http://roflzoo.com/');
@@ -132,7 +132,7 @@ describe('', function() {
           done();
         });
       });
-
+ 
       it('New links create a database entry', function(done) {
         requestWithSession(options, function(error, res, body) {
           db.knex('urls')
@@ -146,7 +146,7 @@ describe('', function() {
             });
         });
       });
-
+   
       it('Fetches the link url title', function (done) {
         requestWithSession(options, function(error, res, body) {
           db.knex('urls')
@@ -251,7 +251,7 @@ describe('', function() {
 
   }); // 'Priviledged Access'
 
-  xdescribe('Account Creation:', function() {
+  describe('Account Creation:', function() {
 
     it('Signup creates a user record', function(done) {
       var options = {

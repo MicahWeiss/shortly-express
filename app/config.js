@@ -19,7 +19,7 @@ db.knex.schema.hasTable('urls').then(function(exists) {
       link.integer('visits');
       link.timestamps();
     }).then(function (table) {
-      console.log('Created Table', table);
+      console.log('Created urls Table', table);
     });
   }
 });
@@ -31,7 +31,7 @@ db.knex.schema.hasTable('clicks').then(function(exists) {
       click.integer('linkId');
       click.timestamps();
     }).then(function (table) {
-      console.log('Created Table', table);
+      console.log('Created clicks Table', table);
     });
   }
 });
@@ -42,13 +42,13 @@ db.knex.schema.hasTable('clicks').then(function(exists) {
 db.knex.schema.hasTable('users').then(function(exists) {
   if (!exists) {
     db.knex.schema.createTable('users', function (user) {
-      user.increments('id').primary();
+      //user.increments('id').primary();
       user.string('username', 255);
       user.string('password', 255);
       //placeholder for more columns if needed
 
     }).then(function (table) {
-      console.log('Created Table', table);
+      console.log('Created users Table', table);
     });
   }
 });
